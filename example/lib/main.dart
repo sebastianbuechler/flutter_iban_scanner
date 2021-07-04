@@ -110,7 +110,8 @@ class _HomeState extends State<Home> {
                         MaterialPageRoute(
                           builder: (context) => IBANScannerView(
                             key: GlobalKey(),
-                            onScannerResult: _showMyDialog,
+                            onScannerResult: (iban) =>
+                                _showMyDialog(context, iban),
                           ),
                         ),
                       ),
@@ -126,7 +127,7 @@ class _HomeState extends State<Home> {
   }
 }
 
-Future<void> _showMyDialog(possibleIBAN) async {
+Future<void> _showMyDialog(context, iban) async {
   return showDialog<void>(
     context: myGlobals.scaffoldKey.currentContext!,
     barrierDismissible: false, // user must tap button!
@@ -136,7 +137,7 @@ Future<void> _showMyDialog(possibleIBAN) async {
         content: SingleChildScrollView(
           child: ListBody(
             children: <Widget>[
-              Text(possibleIBAN),
+              Text(iban),
             ],
           ),
         ),
@@ -144,8 +145,7 @@ Future<void> _showMyDialog(possibleIBAN) async {
           TextButton(
             child: const Text('Correct'),
             onPressed: () {
-              Provider.of<IBANModel>(context, listen: false)
-                  .setIBAN(possibleIBAN);
+              Provider.of<IBANModel>(context, listen: false).setIBAN(iban);
               Navigator.of(context).pop();
             },
           ),

@@ -4,7 +4,6 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:iban/iban.dart';
-import 'package:provider/provider.dart';
 
 import 'camera_view.dart';
 
@@ -13,8 +12,10 @@ List<CameraDescription> cameras = [];
 class IBANScannerView extends StatefulWidget {
   final ValueChanged<String> onScannerResult;
 
-  IBANScannerView({required Key key, required this.onScannerResult})
-      : super(key: key);
+  IBANScannerView({
+    required Key key,
+    required this.onScannerResult,
+  }) : super(key: key);
   @override
   _IBANScannerViewState createState() => _IBANScannerViewState();
 }
@@ -22,6 +23,8 @@ class IBANScannerView extends StatefulWidget {
 class _IBANScannerViewState extends State<IBANScannerView> {
   TextDetector textDetector = GoogleMlKit.vision.textDetector();
   bool isBusy = false;
+  bool ibanFound = false;
+  String iban = "";
   CustomPaint? customPaint;
 
   @override
@@ -42,16 +45,18 @@ class _IBANScannerViewState extends State<IBANScannerView> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [
-      CameraView(
-        title: 'Text Detector',
-        customPaint: customPaint,
-        onImage: (inputImage) {
-          processImage(inputImage, context);
-        },
-      ),
-      getMaskCard(context),
-    ]);
+    return Stack(
+      children: [
+        CameraView(
+          title: 'IBAN Scanner',
+          customPaint: customPaint,
+          onImage: (inputImage) {
+            processImage(inputImage, context);
+          },
+        ),
+        getMask(context),
+      ],
+    );
   }
 
   RegExp regExp = RegExp(
@@ -63,11 +68,8 @@ class _IBANScannerViewState extends State<IBANScannerView> {
   Future<void> processImage(InputImage inputImage, BuildContext context) async {
     if (isBusy) return;
     isBusy = true;
-    var ibanFound = false;
-    var iban;
 
     final recognisedText = await textDetector.processImage(inputImage);
-    print('Found ${recognisedText.blocks.length} textBlocks');
 
     for (final textBlock in recognisedText.blocks) {
       if (!regExp.hasMatch(textBlock.text)) {
@@ -75,7 +77,6 @@ class _IBANScannerViewState extends State<IBANScannerView> {
       }
 
       var possibleIBAN = regExp.stringMatch(textBlock.text).toString();
-      possibleIBAN = possibleIBAN.replaceAll(" ", "");
       if (!isValid(possibleIBAN)) {
         continue;
       }
@@ -85,12 +86,11 @@ class _IBANScannerViewState extends State<IBANScannerView> {
     }
 
     if (ibanFound) {
-      // await textDetector.close();
-      Navigator.pop(context);
-      // Navigator.pop(myGlobals.scaffoldKey.currentContext!);
-      // _showMyDialog(context, iban);
-      widget.onScannerResult(iban);
       isBusy = false;
+      Navigator.pop(
+        context,
+      );
+      widget.onScannerResult(iban);
       return;
     }
 
@@ -101,37 +101,7 @@ class _IBANScannerViewState extends State<IBANScannerView> {
   }
 }
 
-// Future<void> _showMyDialog(context, possibleIBAN) async {
-//   return showDialog<void>(
-//     // context: myGlobals.scaffoldKey.currentContext!,
-//     context: context,
-//     barrierDismissible: false, // user must tap button!
-//     builder: (BuildContext context) {
-//       return AlertDialog(
-//         title: const Text('IBAN found!'),
-//         content: SingleChildScrollView(
-//           child: ListBody(
-//             children: <Widget>[
-//               Text(possibleIBAN),
-//             ],
-//           ),
-//         ),
-//         actions: <Widget>[
-//           TextButton(
-//             child: const Text('Correct'),
-//             onPressed: () {
-//               Provider.of<IBANModel>(context, listen: false)
-//                   .setIBAN(possibleIBAN);
-//               Navigator.of(context).pop();
-//             },
-//           ),
-//         ],
-//       );
-//     },
-//   );
-// }
-
-Widget getMaskCard(BuildContext context) {
+Widget getMask(BuildContext context) {
   Color _background = Colors.grey.withOpacity(0.7);
 
   return Column(
