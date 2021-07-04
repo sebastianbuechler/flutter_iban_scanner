@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:iban/iban.dart';
 
-import 'camera_view.dart';
+import 'view/camera_view.dart';
 
 List<CameraDescription> cameras = [];
 
@@ -45,17 +45,12 @@ class _IBANScannerViewState extends State<IBANScannerView> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        CameraView(
-          title: 'IBAN Scanner',
-          customPaint: customPaint,
-          onImage: (inputImage) {
-            processImage(inputImage, context);
-          },
-        ),
-        getMask(context),
-      ],
+    return CameraView(
+      title: 'IBAN Scanner',
+      customPaint: customPaint,
+      onImage: (inputImage) {
+        processImage(inputImage, context);
+      },
     );
   }
 

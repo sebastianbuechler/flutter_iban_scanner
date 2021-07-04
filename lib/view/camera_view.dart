@@ -3,10 +3,9 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_iban_scanner/flutter_iban_scanner.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_picker/image_picker.dart';
-
-import '../main.dart';
 
 enum ScreenMode { liveFeed, gallery }
 
@@ -45,7 +44,7 @@ class _CameraViewState extends State<CameraView> {
     //     _cameraIndex = i;
     //   }
     // }
-    if (widget.initialDirection == "CameraLensDirection.front") {
+    if (widget.initialDirection == CameraLensDirection.front) {
       _cameraIndex = 1;
     }
 
@@ -120,8 +119,9 @@ class _CameraViewState extends State<CameraView> {
       child: Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          CameraPreview(_controller!),
+          if (_controller != null) CameraPreview(_controller!),
           if (widget.customPaint != null) widget.customPaint!,
+          Mask()
         ],
       ),
     );
@@ -184,6 +184,7 @@ class _CameraViewState extends State<CameraView> {
   }
 
   Future _startLiveFeed() async {
+    cameras = await availableCameras();
     final camera = cameras[_cameraIndex];
     _controller = CameraController(
       camera,
@@ -262,5 +263,64 @@ class _CameraViewState extends State<CameraView> {
         InputImage.fromBytes(bytes: bytes, inputImageData: inputImageData);
 
     widget.onImage(inputImage);
+  }
+}
+
+class Mask extends StatelessWidget {
+  const Mask({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    Color _background = Colors.grey.withOpacity(0.7);
+
+    return Column(
+      children: <Widget>[
+        Row(
+          children: <Widget>[
+            Expanded(
+              child: Container(
+                height: MediaQuery.of(context).size.height,
+                width: 1,
+                color: _background,
+              ),
+            ),
+            Container(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width * 0.95,
+              child: Column(
+                children: <Widget>[
+                  Expanded(
+                    child: Container(
+                      color: _background,
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      border: Border.all(color: Colors.blueAccent),
+                      // borderRadius: BorderRadius.circular(15),
+                    ),
+                    height: MediaQuery.of(context).size.width * 0.1,
+                    width: MediaQuery.of(context).size.width * 0.95,
+                  ),
+                  Expanded(
+                    child: Container(
+                      color: _background,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: Container(
+                height: MediaQuery.of(context).size.height,
+                width: 1,
+                color: _background,
+              ),
+            ),
+          ],
+        )
+      ],
+    );
   }
 }
