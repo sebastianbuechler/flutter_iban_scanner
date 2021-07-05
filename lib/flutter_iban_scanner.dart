@@ -13,7 +13,7 @@ enum ScreenMode { liveFeed, gallery }
 
 class IBANScannerView extends StatefulWidget {
   final ValueChanged<String> onScannerResult;
-  List<CameraDescription> cameras;
+  final List<CameraDescription> cameras;
 
   IBANScannerView({
     required this.onScannerResult,
@@ -26,32 +26,33 @@ class IBANScannerView extends StatefulWidget {
 
 class _IBANScannerViewState extends State<IBANScannerView> {
   TextDetector textDetector = GoogleMlKit.vision.textDetector();
+  ScreenMode _mode = ScreenMode.liveFeed;
+  CameraLensDirection initialDirection = CameraLensDirection.back;
+  CameraController? _controller;
+  File? _image;
+  late ImagePicker _imagePicker;
+  int _cameraIndex = 0;
+  late List<CameraDescription> cameras;
   bool isBusy = false;
   bool ibanFound = false;
   String iban = "";
 
-  ScreenMode _mode = ScreenMode.liveFeed;
-  CustomPaint? customPaint;
-  CameraController? _controller;
-  File? _image;
-  ImagePicker? _imagePicker;
-  int _cameraIndex = 0;
-  CameraLensDirection initialDirection = CameraLensDirection.back;
-
   @override
   void initState() {
     super.initState();
-    if (widget.cameras.length == 0) {
-      _initCameras();
+
+    _initScanner();
+  }
+
+  void _initScanner() async {
+    cameras = widget.cameras;
+    if (cameras.length == 0) {
+      cameras = await availableCameras();
     }
     if (initialDirection == CameraLensDirection.front) {
       _cameraIndex = 1;
     }
-    _startLiveFeed();
-  }
-
-  void _initCameras() async {
-    widget.cameras = await availableCameras();
+    await _startLiveFeed();
   }
 
   @override
@@ -68,19 +69,11 @@ class _IBANScannerViewState extends State<IBANScannerView> {
       floatingActionButton: _floatingActionButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
-
-    // CameraView(
-    //   // customPaint: customPaint,
-    //   cameras: widget.cameras,
-    //   onImage: (inputImage) {
-    //     processImage(inputImage, context);
-    //   },
-    // );
   }
 
   Widget? _floatingActionButton() {
     if (_mode == ScreenMode.gallery) return null;
-    if (widget.cameras.length == 1) return null;
+    if (cameras.length == 1) return null;
     return Container(
         height: 70.0,
         width: 70.0,
@@ -115,7 +108,6 @@ class _IBANScannerViewState extends State<IBANScannerView> {
           fit: StackFit.expand,
           children: <Widget>[
             if (_controller != null) CameraPreview(_controller!),
-            // if (widget.customPaint != null) widget.customPaint!,
             Mask(),
             Positioned(
               top: 0.0,
@@ -176,7 +168,6 @@ class _IBANScannerViewState extends State<IBANScannerView> {
                 fit: StackFit.expand,
                 children: <Widget>[
                   Image.file(_image!),
-                  // if (widget.customPaint != null) widget.customPaint!,
                 ],
               ),
             )
@@ -202,7 +193,7 @@ class _IBANScannerViewState extends State<IBANScannerView> {
   }
 
   Future _getImage(ImageSource source) async {
-    final pickedFile = await _imagePicker?.getImage(source: source);
+    final pickedFile = await _imagePicker.getImage(source: source);
     if (pickedFile != null) {
       _processPickedFile(pickedFile);
     } else {
@@ -233,7 +224,6 @@ class _IBANScannerViewState extends State<IBANScannerView> {
 
     for (final textBlock in recognisedText.blocks) {
       if (!regExp.hasMatch(textBlock.text)) {
-        print(textBlock.text);
         continue;
       }
 
@@ -248,9 +238,6 @@ class _IBANScannerViewState extends State<IBANScannerView> {
     }
 
     if (ibanFound) {
-      if (mounted) {
-        Navigator.of(context).pop(context);
-      }
       widget.onScannerResult(iban);
     }
 
@@ -261,8 +248,7 @@ class _IBANScannerViewState extends State<IBANScannerView> {
   }
 
   Future _startLiveFeed() async {
-    // widget.cameras = await availableCameras();
-    final camera = widget.cameras[_cameraIndex];
+    final camera = cameras[_cameraIndex];
     _controller = CameraController(
       camera,
       ResolutionPreset.high,
@@ -302,7 +288,7 @@ class _IBANScannerViewState extends State<IBANScannerView> {
     final Size imageSize =
         Size(image.width.toDouble(), image.height.toDouble());
 
-    final camera = widget.cameras[_cameraIndex];
+    final camera = cameras[_cameraIndex];
     final imageRotation =
         InputImageRotationMethods.fromRawValue(camera.sensorOrientation) ??
             InputImageRotation.Rotation_0deg;

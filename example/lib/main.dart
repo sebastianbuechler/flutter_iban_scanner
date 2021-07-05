@@ -109,8 +109,9 @@ class _HomeState extends State<Home> {
                           builder: (context) => IBANScannerView(
                               cameras: cameras,
                               onScannerResult: (iban) => {
+                                    Navigator.of(scaffold.currentContext!)
+                                        .pop(),
                                     _showMyDialog(iban),
-                                    _ibanController.text = iban,
                                   }),
                         ),
                       ),
@@ -130,42 +131,45 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-}
 
-Future<void> _showMyDialog(iban) async {
-  return showDialog<void>(
-    context: scaffold.currentContext!,
-    barrierDismissible: false, // user must tap button!
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text('IBAN found!'),
-        content: Text(iban),
-        actions: <Widget>[
-          TextButton(
-            child: const Text('Retry'),
-            onPressed: () {
-              Navigator.of(context).pop();
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => IBANScannerView(
-                      onScannerResult: (iban) => {
-                            _showMyDialog(iban),
-                          }),
-                ),
-              );
-            },
-          ),
-          TextButton(
-            child: const Text('Correct'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          ),
-        ],
-      );
-    },
-  );
+  Future<void> _showMyDialog(iban) async {
+    return showDialog<void>(
+      context: scaffold.currentContext!,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('IBAN found!'),
+          content: Text(iban),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Retry'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => IBANScannerView(
+                        cameras: cameras,
+                        onScannerResult: (iban) => {
+                              Navigator.of(scaffold.currentContext!).pop(),
+                              _showMyDialog(iban),
+                            }),
+                  ),
+                );
+              },
+            ),
+            TextButton(
+              child: const Text('Correct'),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _ibanController.text = iban;
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 // The DismissKeybaord widget (it's reusable)
