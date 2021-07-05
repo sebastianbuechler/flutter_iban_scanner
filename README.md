@@ -11,6 +11,7 @@ This package is heavily inspired by the package [google_ml_kit](https://pub.dev/
 Add this plugin as dependency in your pubspec.yaml.
 
 Call the `IBANScannerView` and proviced an `onScannerResult` callback for handling the result.
+
 ```dart
 IBANScannerView(
 onScannerResult: (iban) => {
@@ -19,4 +20,5 @@ onScannerResult: (iban) => {
 ```
 
 ## Demo
-![Demo](https://github.com/sebastianbuechler/flutter_iban_scanner/blob/master/exampleexample.gif)
+
+![Demo](https://github.com/sebastianbuechler/flutter_iban_scanner/blob/master/example/example.gif)
