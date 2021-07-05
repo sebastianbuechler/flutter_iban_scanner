@@ -18,13 +18,15 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: Color(0xff009ACE),
-        accentColor: Color(0xffFCC442),
+    return DismissKeyboard(
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primaryColor: Color(0xff009ACE),
+          accentColor: Color(0xffFCC442),
+        ),
+        home: Home(),
       ),
-      home: Home(),
     );
   }
 }
@@ -54,7 +56,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final IBANModel ibanModel = Provider.of<IBANModel>(context);
-
+    FocusNode focusNode = FocusNode();
     return Scaffold(
       appBar: AppBar(
         title: Text('IBAN Scanner Demo App'),
@@ -79,6 +81,7 @@ class _HomeState extends State<Home> {
                       mask: '## #### #### #### #### #### #### ####',
                     ),
                   ],
+                  focusNode: focusNode,
                   decoration: InputDecoration(
                     labelText: "IBAN",
                     labelStyle:
@@ -97,16 +100,23 @@ class _HomeState extends State<Home> {
                         Icons.camera_alt,
                         color: Theme.of(context).primaryColor,
                       ),
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => IBANScannerView(
-                            key: GlobalKey(),
-                            onScannerResult: (iban) =>
-                                _showMyDialog(context, iban),
+                      onPressed: () => {
+                        focusNode.unfocus(),
+                        focusNode.canRequestFocus = false,
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => IBANScannerView(
+                              key: GlobalKey(),
+                              onScannerResult: (iban) =>
+                                  _showMyDialog(context, iban),
+                            ),
                           ),
                         ),
-                      ),
+                        Future.delayed(Duration(milliseconds: 100), () {
+                          focusNode.canRequestFocus = true;
+                        }),
+                      },
                     ),
                   ),
                 );
@@ -145,4 +155,24 @@ Future<void> _showMyDialog(context, iban) async {
       );
     },
   );
+}
+
+// The DismissKeybaord widget (it's reusable)
+class DismissKeyboard extends StatelessWidget {
+  final Widget child;
+  DismissKeyboard({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        FocusScopeNode currentFocus = FocusScope.of(context);
+        if (!currentFocus.hasPrimaryFocus &&
+            currentFocus.focusedChild != null) {
+          FocusManager.instance.primaryFocus!.unfocus();
+        }
+      },
+      child: child,
+    );
+  }
 }
