@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_iban_scanner/flutter_iban_scanner.dart';
-import 'package:flutter_iban_scanner_example/model/iban_model.dart';
-import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => IBANModel(),
-      child: MyApp(),
-    ),
+    MyApp(),
   );
 }
 
@@ -41,10 +35,8 @@ class _HomeState extends State<Home> {
 
   @override
   void initState() {
-    final IBANModel ibanModel = Provider.of<IBANModel>(context, listen: false);
-
     super.initState();
-    _ibanController = TextEditingController(text: ibanModel.iban);
+    _ibanController = TextEditingController();
   }
 
   @override
@@ -55,7 +47,6 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
-    final IBANModel ibanModel = Provider.of<IBANModel>(context);
     FocusNode focusNode = FocusNode();
     return Scaffold(
       appBar: AppBar(
@@ -69,58 +60,60 @@ class _HomeState extends State<Home> {
           children: [
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Consumer<IBANModel>(builder: (context, appState, child) {
-                if (_ibanController.text != appState.iban) {
-                  _ibanController.text = appState.iban;
-                }
-                return TextField(
-                  controller: _ibanController,
-                  onChanged: ibanModel.setIBAN,
-                  inputFormatters: [
-                    MaskTextInputFormatter(
-                      mask: '## #### #### #### #### #### #### ####',
-                    ),
-                  ],
-                  focusNode: focusNode,
-                  decoration: InputDecoration(
-                    labelText: "IBAN",
-                    labelStyle:
-                        TextStyle(color: Theme.of(context).primaryColor),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Theme.of(context).primaryColor),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide:
-                          BorderSide(color: Theme.of(context).primaryColor),
-                    ),
-                    hintText: 'CH ....',
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        Icons.camera_alt,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      onPressed: () => {
-                        focusNode.unfocus(),
-                        focusNode.canRequestFocus = false,
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => IBANScannerView(
-                              key: GlobalKey(),
-                              onScannerResult: (iban) =>
-                                  _showMyDialog(context, iban),
-                            ),
-                          ),
-                        ),
-                        Future.delayed(Duration(milliseconds: 100), () {
-                          focusNode.canRequestFocus = true;
-                        }),
-                      },
-                    ),
+              child: TextField(
+                controller: _ibanController,
+                // onChanged: (iban) => _ibanController.text = iban,
+                onChanged: (iban) => _ibanController.value.copyWith(
+                  text: iban,
+                  selection: TextSelection(
+                    baseOffset: iban.length,
+                    extentOffset: iban.length,
                   ),
-                );
-              }),
+                ),
+                // inputFormatters: [
+                //   MaskTextInputFormatter(
+                //     mask: '## #### #### #### #### #### #### ####',
+                //   ),
+                // ],
+                focusNode: focusNode,
+                decoration: InputDecoration(
+                  labelText: "IBAN",
+                  labelStyle: TextStyle(color: Theme.of(context).primaryColor),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Theme.of(context).primaryColor),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: Theme.of(context).primaryColor),
+                  ),
+                  hintText: 'CH ....',
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      Icons.camera_alt,
+                      color: Theme.of(context).primaryColor,
+                    ),
+                    onPressed: () => {
+                      focusNode.unfocus(),
+                      focusNode.canRequestFocus = false,
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => IBANScannerView(
+                              key: GlobalKey(),
+                              onScannerResult: (iban) => {
+                                    _showMyDialog(context, iban),
+                                    _ibanController.text = iban,
+                                  }),
+                        ),
+                      ),
+                      Future.delayed(Duration(milliseconds: 100), () {
+                        focusNode.canRequestFocus = true;
+                      }),
+                    },
+                  ),
+                ),
+              ),
             ),
           ],
         ),
@@ -145,9 +138,24 @@ Future<void> _showMyDialog(context, iban) async {
         ),
         actions: <Widget>[
           TextButton(
+            child: const Text('Retry'),
+            onPressed: () {
+              Navigator.of(context).pop();
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => IBANScannerView(
+                      key: GlobalKey(),
+                      onScannerResult: (iban) => {
+                            _showMyDialog(context, iban),
+                          }),
+                ),
+              );
+            },
+          ),
+          TextButton(
             child: const Text('Correct'),
             onPressed: () {
-              Provider.of<IBANModel>(context, listen: false).setIBAN(iban);
               Navigator.of(context).pop();
             },
           ),
