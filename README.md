@@ -1,14 +1,22 @@
-# flutter_iban_scanner
+# Flutter IBAN Scanner
 
-A new Flutter package project.
+A package for scanning international bank account numbers.
 
-## Getting Started
+## Inspired by
 
-This project is a starting point for a Dart
-[package](https://flutter.dev/developing-packages/),
-a library module containing code that can be shared easily across
-multiple Flutter or Dart projects.
+This package is heavily inspired by the package [google_ml_kit](https://pub.dev/packages/google_ml_kit) and their great examples.
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+## Usage
+
+Add this plugin as dependency in your pubspec.yaml.
+
+Call the `IBANScannerView` and proviced an `onScannerResult` callback for handling the result.
+```dart
+IBANScannerView(
+onScannerResult: (iban) => {
+    // do stuff here
+    }),
+```
+
+## Demo
+![Demo](https://github.com/sebastianbuechler/flutter_iban_scanner/blob/master/exampleexample.gif)
