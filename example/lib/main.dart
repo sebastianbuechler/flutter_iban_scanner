@@ -16,10 +16,7 @@ class MyApp extends StatelessWidget {
     return DismissKeyboard(
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primaryColor: Color(0xff009ACE),
-          accentColor: Color(0xffFCC442),
-        ),
+        theme: _theme,
         home: Home(),
       ),
     );
@@ -34,6 +31,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   late TextEditingController _ibanController;
   late List<CameraDescription> cameras;
+
   @override
   void initState() {
     super.initState();
@@ -54,7 +52,9 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     FocusNode focusNode = FocusNode();
+    GlobalKey _scaffold = GlobalKey();
     return Scaffold(
+      key: _scaffold,
       appBar: AppBar(
         title: Text('IBAN Scanner Demo App'),
         centerTitle: true,
@@ -68,7 +68,6 @@ class _HomeState extends State<Home> {
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
                 controller: _ibanController,
-                // onChanged: (iban) => _ibanController.text = iban,
                 onChanged: (iban) => _ibanController.value.copyWith(
                   text: iban,
                   selection: TextSelection(
@@ -106,7 +105,6 @@ class _HomeState extends State<Home> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => IBANScannerView(
-                              key: GlobalKey(),
                               cameras: cameras,
                               onScannerResult: (iban) => {
                                     _showMyDialog(context, iban),
@@ -114,9 +112,12 @@ class _HomeState extends State<Home> {
                                   }),
                         ),
                       ),
-                      Future.delayed(Duration(milliseconds: 100), () {
-                        focusNode.canRequestFocus = true;
-                      }),
+                      Future.delayed(
+                        Duration(milliseconds: 100),
+                        () {
+                          focusNode.canRequestFocus = true;
+                        },
+                      ),
                     },
                   ),
                 ),
@@ -136,13 +137,7 @@ Future<void> _showMyDialog(context, iban) async {
     builder: (BuildContext context) {
       return AlertDialog(
         title: const Text('IBAN found!'),
-        content: SingleChildScrollView(
-          child: ListBody(
-            children: <Widget>[
-              Text(iban),
-            ],
-          ),
-        ),
+        content: Text(iban),
         actions: <Widget>[
           TextButton(
             child: const Text('Retry'),
@@ -152,7 +147,6 @@ Future<void> _showMyDialog(context, iban) async {
                 context,
                 MaterialPageRoute(
                   builder: (context) => IBANScannerView(
-                      key: GlobalKey(),
                       onScannerResult: (iban) => {
                             _showMyDialog(context, iban),
                           }),
@@ -191,3 +185,8 @@ class DismissKeyboard extends StatelessWidget {
     );
   }
 }
+
+final _theme = ThemeData(
+  primaryColor: Color(0xff009ACE),
+  accentColor: Color(0xffFCC442),
+);

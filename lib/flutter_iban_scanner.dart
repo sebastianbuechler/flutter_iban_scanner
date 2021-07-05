@@ -7,17 +7,15 @@ import 'package:iban/iban.dart';
 
 import 'view/camera_view.dart';
 
-// List<CameraDescription> cameras = [];
-
 class IBANScannerView extends StatefulWidget {
   final ValueChanged<String> onScannerResult;
   List<CameraDescription> cameras;
 
   IBANScannerView({
-    required Key key,
     required this.onScannerResult,
     this.cameras = const <CameraDescription>[],
-  }) : super(key: key);
+  });
+
   @override
   _IBANScannerViewState createState() => _IBANScannerViewState();
 }
@@ -73,28 +71,22 @@ class _IBANScannerViewState extends State<IBANScannerView> {
 
     for (final textBlock in recognisedText.blocks) {
       if (!regExp.hasMatch(textBlock.text)) {
-        print(textBlock.text);
         continue;
       }
 
-      // var possibleIBAN = regExp.stringMatch(textBlock.text).toString();
       var possibleIBAN = regExp.firstMatch(textBlock.text)!.group(2).toString();
-      print(possibleIBAN);
       if (!isValid(possibleIBAN)) {
         continue;
       }
 
       iban = toPrintFormat(possibleIBAN);
       ibanFound = true;
+      break;
     }
 
     if (ibanFound) {
-      isBusy = false;
-      Navigator.pop(
-        context,
-      );
+      Navigator.of(context).pop(context);
       widget.onScannerResult(iban);
-      return;
     }
 
     isBusy = false;
@@ -102,54 +94,4 @@ class _IBANScannerViewState extends State<IBANScannerView> {
       setState(() {});
     }
   }
-}
-
-Widget getMask(BuildContext context) {
-  Color _background = Colors.grey.withOpacity(0.7);
-
-  return Column(
-    children: <Widget>[
-      Row(
-        children: <Widget>[
-          Expanded(
-            child: Container(
-              height: MediaQuery.of(context).size.height,
-              width: 1,
-              color: _background,
-            ),
-          ),
-          Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width * 0.9,
-            child: Column(
-              children: <Widget>[
-                Expanded(
-                  child: Container(
-                    color: _background,
-                  ),
-                ),
-                Container(
-                  height: MediaQuery.of(context).size.width * 0.1,
-                  width: MediaQuery.of(context).size.width * 0.8,
-                  color: Colors.transparent,
-                ),
-                Expanded(
-                  child: Container(
-                    color: _background,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Container(
-              height: MediaQuery.of(context).size.height,
-              width: 1,
-              color: _background,
-            ),
-          ),
-        ],
-      )
-    ],
-  );
 }
