@@ -10,13 +10,13 @@ import 'package:image_picker/image_picker.dart';
 enum ScreenMode { liveFeed, gallery }
 
 class CameraView extends StatefulWidget {
-  CameraView(
-      {Key? key,
-      required this.title,
-      required this.customPaint,
-      required this.onImage,
-      this.initialDirection = CameraLensDirection.back})
-      : super(key: key);
+  CameraView({
+    Key? key,
+    required this.title,
+    required this.customPaint,
+    required this.onImage,
+    this.initialDirection = CameraLensDirection.back,
+  }) : super(key: key);
 
   final String title;
   final CustomPaint? customPaint;
@@ -60,24 +60,6 @@ class _CameraViewState extends State<CameraView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 20.0),
-            child: GestureDetector(
-              onTap: _switchScreenMode,
-              child: Icon(
-                _mode == ScreenMode.liveFeed
-                    ? Icons.photo_library_outlined
-                    : (Platform.isIOS
-                        ? Icons.camera_alt_outlined
-                        : Icons.camera),
-              ),
-            ),
-          ),
-        ],
-      ),
       body: _body(),
       floatingActionButton: _floatingActionButton(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -114,15 +96,49 @@ class _CameraViewState extends State<CameraView> {
     if (_controller?.value.isInitialized == false) {
       return Container();
     }
-    return Container(
-      color: Colors.black,
-      child: Stack(
-        fit: StackFit.expand,
-        children: <Widget>[
-          if (_controller != null) CameraPreview(_controller!),
-          if (widget.customPaint != null) widget.customPaint!,
-          Mask()
-        ],
+    return SafeArea(
+      child: Container(
+        color: Colors.black,
+        child: Stack(
+          fit: StackFit.expand,
+          children: <Widget>[
+            if (_controller != null) CameraPreview(_controller!),
+            if (widget.customPaint != null) widget.customPaint!,
+            Mask(),
+            Positioned(
+              top: 0.0,
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(left: 20.0, top: 20),
+                      child: GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: Icon(Icons.arrow_back),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(right: 20.0, top: 20),
+                      child: GestureDetector(
+                        onTap: _switchScreenMode,
+                        child: Icon(
+                          _mode == ScreenMode.liveFeed
+                              ? Icons.photo_library_outlined
+                              : (Platform.isIOS
+                                  ? Icons.camera_alt_outlined
+                                  : Icons.camera),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -273,54 +289,55 @@ class Mask extends StatelessWidget {
   Widget build(BuildContext context) {
     Color _background = Colors.grey.withOpacity(0.7);
 
-    return Column(
-      children: <Widget>[
-        Row(
-          children: <Widget>[
-            Expanded(
-              child: Container(
-                height: MediaQuery.of(context).size.height,
-                width: 1,
-                color: _background,
+    return SafeArea(
+      child: Column(
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Container(
+                  height: MediaQuery.of(context).size.height - 25,
+                  width: 1,
+                  color: _background,
+                ),
               ),
-            ),
-            Container(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width * 0.95,
-              child: Column(
-                children: <Widget>[
-                  Expanded(
-                    child: Container(
-                      color: _background,
+              Container(
+                height: MediaQuery.of(context).size.height - 25,
+                width: MediaQuery.of(context).size.width * 0.95,
+                child: Column(
+                  children: <Widget>[
+                    Expanded(
+                      child: Container(
+                        color: _background,
+                      ),
                     ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      border: Border.all(color: Colors.blueAccent),
-                      // borderRadius: BorderRadius.circular(15),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.transparent,
+                        border: Border.all(color: Colors.blueAccent),
+                      ),
+                      height: MediaQuery.of(context).size.width * 0.1,
+                      width: MediaQuery.of(context).size.width * 0.95,
                     ),
-                    height: MediaQuery.of(context).size.width * 0.1,
-                    width: MediaQuery.of(context).size.width * 0.95,
-                  ),
-                  Expanded(
-                    child: Container(
-                      color: _background,
+                    Expanded(
+                      child: Container(
+                        color: _background,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: Container(
-                height: MediaQuery.of(context).size.height,
-                width: 1,
-                color: _background,
+              Expanded(
+                child: Container(
+                  height: MediaQuery.of(context).size.height - 25,
+                  width: 1,
+                  color: _background,
+                ),
               ),
-            ),
-          ],
-        )
-      ],
+            ],
+          )
+        ],
+      ),
     );
   }
 }
