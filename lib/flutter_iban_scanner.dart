@@ -7,14 +7,16 @@ import 'package:iban/iban.dart';
 
 import 'view/camera_view.dart';
 
-List<CameraDescription> cameras = [];
+// List<CameraDescription> cameras = [];
 
 class IBANScannerView extends StatefulWidget {
   final ValueChanged<String> onScannerResult;
+  List<CameraDescription> cameras;
 
   IBANScannerView({
     required Key key,
     required this.onScannerResult,
+    this.cameras = const <CameraDescription>[],
   }) : super(key: key);
   @override
   _IBANScannerViewState createState() => _IBANScannerViewState();
@@ -30,11 +32,13 @@ class _IBANScannerViewState extends State<IBANScannerView> {
   @override
   void initState() {
     super.initState();
-    _initCameras();
+    if (widget.cameras.length == 0) {
+      _initCameras();
+    }
   }
 
   void _initCameras() async {
-    cameras = await availableCameras();
+    widget.cameras = await availableCameras();
   }
 
   @override
@@ -48,6 +52,7 @@ class _IBANScannerViewState extends State<IBANScannerView> {
     return CameraView(
       title: 'IBAN Scanner',
       customPaint: customPaint,
+      cameras: widget.cameras,
       onImage: (inputImage) {
         processImage(inputImage, context);
       },
@@ -55,7 +60,7 @@ class _IBANScannerViewState extends State<IBANScannerView> {
   }
 
   RegExp regExp = RegExp(
-    r"^([A-Z]{2}[ \-]?[0-9]{2})(?=(?:[ \-]?[A-Z0-9]){9,30}$)((?:[ \-]?[A-Z0-9]{3,5}){2,7})([ \-]?[A-Z0-9]{1,3})?$",
+    r"^(.*)(([A-Z]{2}[ \-]?[0-9]{2})(?=(?:[ \-]?[A-Z0-9]){9,30}$)((?:[ \-]?[A-Z0-9]{3,5}){2,7})([ \-]?[A-Z0-9]{1,3})?)$",
     caseSensitive: false,
     multiLine: false,
   );
@@ -68,10 +73,13 @@ class _IBANScannerViewState extends State<IBANScannerView> {
 
     for (final textBlock in recognisedText.blocks) {
       if (!regExp.hasMatch(textBlock.text)) {
+        print(textBlock.text);
         continue;
       }
 
-      var possibleIBAN = regExp.stringMatch(textBlock.text).toString();
+      // var possibleIBAN = regExp.stringMatch(textBlock.text).toString();
+      var possibleIBAN = regExp.firstMatch(textBlock.text)!.group(2).toString();
+      print(possibleIBAN);
       if (!isValid(possibleIBAN)) {
         continue;
       }

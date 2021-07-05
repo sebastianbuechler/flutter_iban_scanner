@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_iban_scanner/flutter_iban_scanner.dart';
+import 'package:camera/camera.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,10 +33,11 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   late TextEditingController _ibanController;
-
+  late List<CameraDescription> cameras;
   @override
   void initState() {
     super.initState();
+    _initCameras();
     _ibanController = TextEditingController();
   }
 
@@ -43,6 +45,10 @@ class _HomeState extends State<Home> {
   void dispose() {
     _ibanController.dispose();
     super.dispose();
+  }
+
+  void _initCameras() async {
+    cameras = await availableCameras();
   }
 
   @override
@@ -101,6 +107,7 @@ class _HomeState extends State<Home> {
                         MaterialPageRoute(
                           builder: (context) => IBANScannerView(
                               key: GlobalKey(),
+                              cameras: cameras,
                               onScannerResult: (iban) => {
                                     _showMyDialog(context, iban),
                                     _ibanController.text = iban,

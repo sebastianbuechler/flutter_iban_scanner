@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_iban_scanner/flutter_iban_scanner.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -15,6 +14,7 @@ class CameraView extends StatefulWidget {
     required this.title,
     required this.customPaint,
     required this.onImage,
+    required this.cameras,
     this.initialDirection = CameraLensDirection.back,
   }) : super(key: key);
 
@@ -22,6 +22,7 @@ class CameraView extends StatefulWidget {
   final CustomPaint? customPaint;
   final Function(InputImage inputImage) onImage;
   final CameraLensDirection initialDirection;
+  final List<CameraDescription> cameras;
 
   @override
   _CameraViewState createState() => _CameraViewState();
@@ -68,7 +69,7 @@ class _CameraViewState extends State<CameraView> {
 
   Widget? _floatingActionButton() {
     if (_mode == ScreenMode.gallery) return null;
-    if (cameras.length == 1) return null;
+    if (widget.cameras.length == 1) return null;
     return Container(
         height: 70.0,
         width: 70.0,
@@ -200,8 +201,8 @@ class _CameraViewState extends State<CameraView> {
   }
 
   Future _startLiveFeed() async {
-    cameras = await availableCameras();
-    final camera = cameras[_cameraIndex];
+    // widget.cameras = await availableCameras();
+    final camera = widget.cameras[_cameraIndex];
     _controller = CameraController(
       camera,
       ResolutionPreset.medium,
@@ -249,7 +250,7 @@ class _CameraViewState extends State<CameraView> {
     final Size imageSize =
         Size(image.width.toDouble(), image.height.toDouble());
 
-    final camera = cameras[_cameraIndex];
+    final camera = widget.cameras[_cameraIndex];
     final imageRotation =
         InputImageRotationMethods.fromRawValue(camera.sensorOrientation) ??
             InputImageRotation.Rotation_0deg;
