@@ -10,6 +10,8 @@ Future<void> main() async {
   );
 }
 
+GlobalKey scaffold = GlobalKey();
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -52,9 +54,9 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     FocusNode focusNode = FocusNode();
-    GlobalKey _scaffold = GlobalKey();
+
     return Scaffold(
-      key: _scaffold,
+      key: scaffold,
       appBar: AppBar(
         title: Text('IBAN Scanner Demo App'),
         centerTitle: true,
@@ -107,7 +109,7 @@ class _HomeState extends State<Home> {
                           builder: (context) => IBANScannerView(
                               cameras: cameras,
                               onScannerResult: (iban) => {
-                                    _showMyDialog(context, iban),
+                                    _showMyDialog(iban),
                                     _ibanController.text = iban,
                                   }),
                         ),
@@ -130,9 +132,9 @@ class _HomeState extends State<Home> {
   }
 }
 
-Future<void> _showMyDialog(context, iban) async {
+Future<void> _showMyDialog(iban) async {
   return showDialog<void>(
-    context: context,
+    context: scaffold.currentContext!,
     barrierDismissible: false, // user must tap button!
     builder: (BuildContext context) {
       return AlertDialog(
@@ -148,7 +150,7 @@ Future<void> _showMyDialog(context, iban) async {
                 MaterialPageRoute(
                   builder: (context) => IBANScannerView(
                       onScannerResult: (iban) => {
-                            _showMyDialog(context, iban),
+                            _showMyDialog(iban),
                           }),
                 ),
               );
