@@ -53,6 +53,7 @@ class _IBANScannerViewState extends State<IBANScannerView> {
       _cameraIndex = 1;
     }
     await _startLiveFeed();
+    _imagePicker = ImagePicker();
   }
 
   @override

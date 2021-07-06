@@ -1,5 +1,5 @@
 name: flutter_iban_scanner_example
-description: A new Flutter project.
+description: Flutter IBAN scanner example.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
