@@ -46,3 +46,7 @@ Any pull requests and extension ideas are welcome.
 ## Author
 
 The Flutter IBAN Scanner package is written by [Sebastian Büchler](https://github.com/sebastianbuechler)
+
+## Roadmap
+
+* Modular Overlay: <https://stackoverflow.com/questions/56276522/square-camera-overlay-using-flutter>
