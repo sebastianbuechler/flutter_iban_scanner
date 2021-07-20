@@ -1,6 +1,7 @@
 # Flutter IBAN Scanner
 
 [![pub package](https://img.shields.io/pub/v/flutter_iban_scanner.svg)](https://pub.dev/packages/flutter_iban_scanner)
+[![CodeFactor](https://www.codefactor.io/repository/github/sebastianbuechler/flutter_iban_scanner/badge)](https://www.codefactor.io/repository/github/sebastianbuechler/flutter_iban_scanner)
 
 A package for scanning IBANs  (international bank account numbers) with the help of the smartphone camera and Google's ml kit.
 
