@@ -107,12 +107,14 @@ class _HomeState extends State<Home> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => IBANScannerView(
-                              cameras: cameras,
-                              onScannerResult: (iban) => {
-                                    Navigator.of(scaffold.currentContext!)
-                                        .pop(),
-                                    _showMyDialog(iban),
-                                  }),
+                            cameras: cameras,
+                            onScannerResult: (iban) => {
+                              Navigator.of(scaffold.currentContext!).pop(),
+                              _showMyDialog(iban),
+                            },
+                            allowImagePicker: false,
+                            allowCameraSwitch: false,
+                          ),
                         ),
                       ),
                       Future.delayed(
@@ -149,11 +151,14 @@ class _HomeState extends State<Home> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => IBANScannerView(
-                        cameras: cameras,
-                        onScannerResult: (iban) => {
-                              Navigator.of(scaffold.currentContext!).pop(),
-                              _showMyDialog(iban),
-                            }),
+                      cameras: cameras,
+                      onScannerResult: (iban) => {
+                        Navigator.of(scaffold.currentContext!).pop(),
+                        _showMyDialog(iban),
+                      },
+                      allowImagePicker: false,
+                      allowCameraSwitch: false,
+                    ),
                   ),
                 );
               },

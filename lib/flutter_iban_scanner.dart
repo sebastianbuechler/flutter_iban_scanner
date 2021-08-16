@@ -14,10 +14,14 @@ enum ScreenMode { liveFeed, gallery }
 class IBANScannerView extends StatefulWidget {
   final ValueChanged<String> onScannerResult;
   final List<CameraDescription> cameras;
+  final bool allowImagePicker;
+  final bool allowCameraSwitch;
 
   IBANScannerView({
     required this.onScannerResult,
     this.cameras = const <CameraDescription>[],
+    this.allowImagePicker = true,
+    this.allowCameraSwitch = true,
   });
 
   @override
@@ -75,6 +79,7 @@ class _IBANScannerViewState extends State<IBANScannerView> {
   Widget? _floatingActionButton() {
     if (_mode == ScreenMode.gallery) return null;
     if (cameras.length == 1) return null;
+    if (widget.allowCameraSwitch == false) return null;
     return Container(
         height: 70.0,
         width: 70.0,
@@ -125,19 +130,20 @@ class _IBANScannerViewState extends State<IBANScannerView> {
                         child: Icon(Icons.arrow_back),
                       ),
                     ),
-                    Padding(
-                      padding: EdgeInsets.only(right: 20.0, top: 20),
-                      child: GestureDetector(
-                        onTap: _switchScreenMode,
-                        child: Icon(
-                          _mode == ScreenMode.liveFeed
-                              ? Icons.photo_library_outlined
-                              : (Platform.isIOS
-                                  ? Icons.camera_alt_outlined
-                                  : Icons.camera),
+                    if (widget.allowImagePicker)
+                      Padding(
+                        padding: EdgeInsets.only(right: 20.0, top: 20),
+                        child: GestureDetector(
+                          onTap: _switchScreenMode,
+                          child: Icon(
+                            _mode == ScreenMode.liveFeed
+                                ? Icons.photo_library_outlined
+                                : (Platform.isIOS
+                                    ? Icons.camera_alt_outlined
+                                    : Icons.camera),
+                          ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -317,8 +323,9 @@ class _IBANScannerViewState extends State<IBANScannerView> {
 
     final inputImage =
         InputImage.fromBytes(bytes: bytes, inputImageData: inputImageData);
-
-    processImage(inputImage);
+    if (mounted) {
+      processImage(inputImage);
+    }
   }
 }
 
