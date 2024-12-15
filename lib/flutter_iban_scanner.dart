@@ -230,7 +230,6 @@ class _IBANScannerViewState extends State<IBANScannerView> {
       if (!regExp.hasMatch(textBlock.text)) {
         continue;
       }
-      print(textBlock.text);
       var possibleIBAN = regExp.firstMatch(textBlock.text)!.group(2).toString();
       if (!isValid(possibleIBAN)) {
         continue;
