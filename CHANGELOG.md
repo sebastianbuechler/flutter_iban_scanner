@@ -1,3 +1,6 @@
+# 0.2.0
+
+* Upgraded to SDK V3
 
 # 0.1.1
 
