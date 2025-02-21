@@ -1,6 +1,6 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iban_scanner/flutter_iban_scanner.dart';
-import 'package:camera/camera.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -199,5 +199,4 @@ class DismissKeyboard extends StatelessWidget {
 
 final _theme = ThemeData(
   primaryColor: Color(0xff009ACE),
-  accentColor: Color(0xffFCC442),
 );

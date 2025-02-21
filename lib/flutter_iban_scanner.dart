@@ -13,13 +13,13 @@ enum ScreenMode { liveFeed, gallery }
 
 class IBANScannerView extends StatefulWidget {
   final ValueChanged<String> onScannerResult;
-  final List<CameraDescription> cameras;
+  final List<CameraDescription>? cameras;
   final bool allowImagePicker;
   final bool allowCameraSwitch;
 
   IBANScannerView({
     required this.onScannerResult,
-    this.cameras = const <CameraDescription>[],
+    this.cameras,
     this.allowImagePicker = true,
     this.allowCameraSwitch = true,
   });
@@ -49,10 +49,7 @@ class _IBANScannerViewState extends State<IBANScannerView> {
   }
 
   void _initScanner() async {
-    cameras = widget.cameras;
-    if (cameras.length == 0) {
-      cameras = await availableCameras();
-    }
+    cameras = widget.cameras ?? await availableCameras();
     if (initialDirection == CameraLensDirection.front) {
       _cameraIndex = 1;
     }
@@ -200,7 +197,7 @@ class _IBANScannerViewState extends State<IBANScannerView> {
   }
 
   Future _getImage(ImageSource source) async {
-    final pickedFile = await _imagePicker.getImage(source: source);
+    final pickedFile = await _imagePicker.pickImage(source: source);
     if (pickedFile != null) {
       _processPickedFile(pickedFile);
     } else {
@@ -209,7 +206,7 @@ class _IBANScannerViewState extends State<IBANScannerView> {
     setState(() {});
   }
 
-  Future _processPickedFile(PickedFile pickedFile) async {
+  Future _processPickedFile(XFile pickedFile) async {
     setState(() {
       _image = File(pickedFile.path);
     });
@@ -233,7 +230,6 @@ class _IBANScannerViewState extends State<IBANScannerView> {
       if (!regExp.hasMatch(textBlock.text)) {
         continue;
       }
-
       var possibleIBAN = regExp.firstMatch(textBlock.text)!.group(2).toString();
       if (!isValid(possibleIBAN)) {
         continue;
